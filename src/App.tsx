@@ -1,4 +1,12 @@
-import { Modal, Button, version, Typography, Layout } from "antd";
+import {
+  Modal,
+  Button,
+  version,
+  Typography,
+  Layout,
+  Divider,
+  Space,
+} from "antd";
 import ReactPlayer from "react-player";
 import { playerMachine } from "./playerMachine";
 import { useMachine } from "@xstate/react";
@@ -77,7 +85,11 @@ function App() {
           mask={!isMinimized}
           maskClosable={!isMinimized}
           title={
-            <div style={{ cursor: isMinimized ? "move" : "auto" }}>
+            <div
+              style={{
+                cursor: isMinimized ? "move" : "auto",
+              }}
+            >
               <Title level={2} title="Video title">
                 {state.context.video.title}
               </Title>
@@ -109,6 +121,7 @@ function App() {
             <Draggable
               disabled={!isMinimized}
               bounds={state.context.videoBounds}
+              position={isMinimized ? undefined : { x: 0, y: 0 }}
               nodeRef={draggleRef}
               onStart={(event, uiData) => onStart(event, uiData)}
             >
@@ -116,17 +129,30 @@ function App() {
             </Draggable>
           )}
         >
-          <ReactPlayer
-            src={state.context.video.url}
-            playing={state.context.isPlaying}
-            controls={true}
-            width="auto"
-            height="auto"
-            muted={false}
-            loop={true}
-            onPlay={() => send({ type: "PLAY" })}
-            onPause={() => send({ type: "PAUSE" })}
-          />
+          <Space direction="vertical" style={{ width: "100%" }}>
+            {!isMinimized && <Divider style={{ borderColor: "#9b9b9bff" }} />}
+            <div
+              style={{
+                aspectRatio: "16 / 9",
+                width: "100%",
+                position: "relative",
+                backgroundColor: "black",
+              }}
+            >
+              <ReactPlayer
+                src={state.context.video.url}
+                playing={state.context.isPlaying}
+                controls={true}
+                width="100%"
+                height="100%"
+                muted={false}
+                loop={true}
+                onPlay={() => send({ type: "PLAY" })}
+                onPause={() => send({ type: "PAUSE" })}
+              />
+            </div>
+            {!isMinimized && <Divider style={{ borderColor: "#9b9b9bff" }} />}
+          </Space>
         </Modal>
       </Layout.Content>
     </Layout>

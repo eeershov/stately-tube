@@ -41,9 +41,11 @@ export const playerMachine = setup({
     dragVideo: assign({
       videoBounds: ({ event }) => {
         assertEvent(event, "DRAG_MINIMIZED");
-        console.log("event", event);
         return event.videoBounds;
       },
+    }),
+    resetVideoBounds: assign({
+      videoBounds: { bottom: 0, left: 0, right: 0, top: 0 },
     }),
   },
 }).createMachine({
@@ -65,7 +67,7 @@ export const playerMachine = setup({
     idle: {
       entry: "pause",
       on: {
-        OPEN: { target: "modal" },
+        OPEN: { target: "modal", actions: "resetVideoBounds" },
       },
     },
 
@@ -83,7 +85,7 @@ export const playerMachine = setup({
       on: {
         DRAG_MINIMIZED: { actions: "dragVideo" },
         CLOSE: { target: "idle" },
-        MINIMIZE_TOGGLE: { target: "modal" },
+        MINIMIZE_TOGGLE: { actions: "resetVideoBounds", target: "modal" },
         PLAY: { actions: "play" },
         PAUSE: { actions: "pause" },
       },
