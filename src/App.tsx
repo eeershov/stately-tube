@@ -1,12 +1,14 @@
-import { useState } from "react";
-import "./App.css";
 import { Modal, Button, version, Typography, Layout } from "antd";
 import ReactPlayer from "react-player";
+import { playerMachine } from "./playerMachine";
+import { useMachine } from "@xstate/react";
 
 const { Title } = Typography;
 
 function App() {
-  const [open, setOpen] = useState<boolean>(false);
+  const [state, send] = useMachine(playerMachine);
+  const isMinimized = state.matches("minimized");
+  const isOpen = !state.matches("idle");
 
   return (
     <Layout
@@ -26,14 +28,14 @@ function App() {
         <h1>antd version: {version}</h1>
         <Button
           type="primary"
-          onClick={() => setOpen(true)}
+          onClick={() => send({ type: "OPEN" })}
           style={{ width: 400, height: 300 }}
         >
           Play video
         </Button>
         <Modal
-          height={800}
-          width={1000}
+          height={isMinimized ? 300 : 800}
+          width={isMinimized ? 400 : 1000}
           centered
           title={
             <Title level={2} title="Video title">
@@ -41,12 +43,20 @@ function App() {
             </Title>
           }
           footer={
-            <Button type="primary" onClick={() => setOpen(false)}>
-              Close
-            </Button>
+            <>
+              <Button
+                type="dashed"
+                onClick={() => send({ type: "MINIMIZE_TOGGLE" })}
+              >
+                {isMinimized ? "Maximize" : "Minimize"}
+              </Button>
+              <Button type="primary" onClick={() => send({ type: "CLOSE" })}>
+                Close
+              </Button>
+            </>
           }
-          open={open}
-          onCancel={() => setOpen(false)}
+          open={isOpen}
+          onCancel={() => send({ type: "CLOSE" })}
         >
           <ReactPlayer
             muted={true}
@@ -55,7 +65,7 @@ function App() {
             width="auto"
             height="auto"
             loop
-            src="https://cdn.flowplayer.com/d9cd469f-14fc-4b7b-a7f6-ccbfa755dcb8/hls/383f752a-cbd1-4691-a73f-a4e583391b3d/playlist.m3u8"
+            src={state.context.videoUrl}
           />
         </Modal>
       </Layout.Content>
