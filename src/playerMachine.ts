@@ -1,11 +1,10 @@
 import { assertEvent, assign, setup } from "xstate";
 import { VIDEOS } from "./consts";
 
-type Context = {
-  video: {
-    title: string;
-    url: string;
-  };
+type VideoType = (typeof VIDEOS)[number];
+
+interface Context {
+  video: VideoType;
   isPlaying: boolean;
   videoBounds: { left: number; top: number; bottom: number; right: number };
   videoHistory: { videoUrl: string; rating: number }[];
@@ -15,7 +14,7 @@ type Events =
   | { type: "OPEN" }
   | { type: "CLOSE" }
   | { type: "MINIMIZE_TOGGLE" }
-  | { type: "CHANGE_VIDEO"; video: { title: string; url: string } }
+  | { type: "CHANGE_VIDEO"; video: VideoType }
   | { type: "RATE"; videoRated: { videoUrl: string; rating: number } }
   | {
       type: "DRAG_MINIMIZED";
