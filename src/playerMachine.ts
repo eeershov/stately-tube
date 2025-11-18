@@ -104,6 +104,7 @@ export const playerMachine = setup({
         MINIMIZE_TOGGLE: { actions: "resetVideoBounds", target: "modal" },
         PLAY: { actions: "play" },
         PAUSE: { actions: "pause" },
+        RATE: { actions: "rate" },
       },
     },
   },
