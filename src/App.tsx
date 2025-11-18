@@ -17,6 +17,16 @@ function App() {
   const isOpen = !state.matches("idle");
   const draggleRef = useRef<HTMLDivElement>(null!);
 
+  const handleRandomVideo = () => {
+    const uniqueVideos = VIDEOS.filter(
+      (video) => video.url !== state.context.video.url
+    );
+    send({
+      type: "CHANGE_VIDEO",
+      video: uniqueVideos[Math.floor(Math.random() * uniqueVideos.length)],
+    });
+  };
+
   const onStart = (_event: DraggableEvent, uiData: DraggableData) => {
     const { clientWidth, clientHeight } = window.document.documentElement;
     const targetRect = draggleRef.current?.getBoundingClientRect();
@@ -81,16 +91,7 @@ function App() {
               >
                 {isMinimized ? "Maximize" : "Minimize"}
               </Button>
-              <Button
-                onClick={() =>
-                  send({
-                    type: "CHANGE_VIDEO",
-                    video: VIDEOS[Math.floor(Math.random() * VIDEOS.length)],
-                  })
-                }
-              >
-                Change to random video
-              </Button>
+              <Button onClick={handleRandomVideo}>Random video</Button>
               <Button
                 onClick={() =>
                   state.context.isPlaying
