@@ -6,6 +6,7 @@ import {
   Layout,
   Divider,
   Space,
+  Card,
 } from "antd";
 import ReactPlayer from "react-player";
 import { playerMachine } from "./playerMachine";
@@ -16,6 +17,13 @@ import Draggable, {
   type DraggableEvent,
 } from "react-draggable";
 import { useRef } from "react";
+import {
+  ArrowsAltOutlined,
+  CaretRightOutlined,
+  PauseOutlined,
+  PlayCircleOutlined,
+  ShrinkOutlined,
+} from "@ant-design/icons";
 
 const { Title } = Typography;
 
@@ -67,18 +75,34 @@ function App() {
           flexDirection: "column",
         }}
       >
-        <Title level={5}>antd version: {version}</Title>
-        <Button
-          type="primary"
-          onClick={() => send({ type: "OPEN" })}
-          style={{ width: 400, height: 300 }}
-          disabled={isOpen}
+        <Card
+          title="Welcome to the Stately-Tube"
+          style={{ width: "min-content" }}
         >
-          Play video
-        </Button>
+          <Button
+            type="link"
+            onClick={() => send({ type: "OPEN" })}
+            style={{
+              width: 300,
+              height: 180,
+              border: 2,
+              borderColor: "blue",
+              borderStyle: "solid",
+            }}
+            disabled={isOpen}
+          >
+            <PlayCircleOutlined style={{ fontSize: 64 }} />
+          </Button>
+          <Divider />
+          <Card type="inner" title="Tech stack" style={{ width: "" }}>
+            <Typography>
+              Vite, React, Typescript, react-player, antd {version}
+            </Typography>
+          </Card>
+        </Card>
         <Modal
           height={isMinimized ? 300 : 800}
-          width={isMinimized ? 400 : 1000}
+          width={isMinimized ? 500 : 1000}
           destroyOnHidden
           centered
           wrapClassName={isMinimized ? "floating-minimized-player" : undefined}
@@ -97,21 +121,26 @@ function App() {
           }
           footer={
             <>
+              <Button onClick={handleRandomVideo}>Random video</Button>
               <Button
                 type="dashed"
                 onClick={() => send({ type: "MINIMIZE_TOGGLE" })}
               >
-                {isMinimized ? "Maximize" : "Minimize"}
+                {isMinimized ? <ArrowsAltOutlined /> : <ShrinkOutlined />}
               </Button>
-              <Button onClick={handleRandomVideo}>Random video</Button>
               <Button
+                type="primary"
                 onClick={() =>
                   state.context.isPlaying
                     ? send({ type: "PAUSE" })
                     : send({ type: "PLAY" })
                 }
               >
-                {state.context.isPlaying ? "Pause" : "Play"}
+                {state.context.isPlaying ? (
+                  <PauseOutlined />
+                ) : (
+                  <CaretRightOutlined />
+                )}
               </Button>
             </>
           }
