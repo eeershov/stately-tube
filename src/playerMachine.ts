@@ -6,8 +6,9 @@ type Context = {
     title: string;
     url: string;
   };
-  videoBounds: { left: number; top: number; bottom: number; right: number };
   isPlaying: boolean;
+  videoBounds: { left: number; top: number; bottom: number; right: number };
+  videoHistory: { videoUrl: string; rating: number }[];
 };
 
 type Events =
@@ -15,6 +16,7 @@ type Events =
   | { type: "CLOSE" }
   | { type: "MINIMIZE_TOGGLE" }
   | { type: "CHANGE_VIDEO"; video: { title: string; url: string } }
+  | { type: "RATE"; videoRated: { videoUrl: string; rating: number } }
   | {
       type: "DRAG_MINIMIZED";
       videoBounds: { left: number; top: number; bottom: number; right: number };
@@ -47,14 +49,27 @@ export const playerMachine = setup({
     resetVideoBounds: assign({
       videoBounds: { bottom: 0, left: 0, right: 0, top: 0 },
     }),
+    rate: assign({
+      videoHistory: ({ context, event }) => {
+        assertEvent(event, "RATE");
+        const { videoUrl, rating } = event.videoRated;
+
+        const historyWithoutCurrent = context.videoHistory.filter(
+          (item) => item.videoUrl !== videoUrl
+        );
+
+        return [...historyWithoutCurrent, { videoUrl, rating }];
+      },
+    }),
   },
 }).createMachine({
   id: "videoPlayer",
   initial: "idle",
   context: {
     video: VIDEOS[0],
-    isPlaying: true,
+    isPlaying: false,
     videoBounds: { bottom: 0, left: 0, right: 0, top: 0 },
+    videoHistory: [],
   },
 
   on: {
@@ -78,6 +93,7 @@ export const playerMachine = setup({
         MINIMIZE_TOGGLE: { target: "minimized" },
         PLAY: { actions: "play" },
         PAUSE: { actions: "pause" },
+        RATE: { actions: "rate" },
       },
     },
 

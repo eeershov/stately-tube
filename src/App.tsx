@@ -7,6 +7,8 @@ import {
   Divider,
   Space,
   Card,
+  Rate,
+  Flex,
 } from "antd";
 import ReactPlayer from "react-player";
 import { playerMachine } from "./playerMachine";
@@ -33,9 +35,15 @@ function App() {
   const isOpen = !state.matches("idle");
   const draggleRef = useRef<HTMLDivElement>(null!);
 
+  const currentVideoUrl = state.context.video.url;
+  const currentRatingEntry = state.context.videoHistory.find(
+    (viewedVideo) => viewedVideo.videoUrl === currentVideoUrl
+  );
+  const currentRating = currentRatingEntry ? currentRatingEntry.rating : 0;
+
   const handleRandomVideo = () => {
     const uniqueVideos = VIDEOS.filter(
-      (video) => video.url !== state.context.video.url
+      (video) => video.url !== currentVideoUrl
     );
     send({
       type: "CHANGE_VIDEO",
@@ -120,29 +128,44 @@ function App() {
             </div>
           }
           footer={
-            <>
-              <Button onClick={handleRandomVideo}>Random video</Button>
-              <Button
-                type="dashed"
-                onClick={() => send({ type: "MINIMIZE_TOGGLE" })}
-              >
-                {isMinimized ? <ArrowsAltOutlined /> : <ShrinkOutlined />}
-              </Button>
-              <Button
-                type="primary"
-                onClick={() =>
-                  state.context.isPlaying
-                    ? send({ type: "PAUSE" })
-                    : send({ type: "PLAY" })
-                }
-              >
-                {state.context.isPlaying ? (
-                  <PauseOutlined />
-                ) : (
-                  <CaretRightOutlined />
-                )}
-              </Button>
-            </>
+            <Flex justify="space-between">
+              <Rate
+                value={currentRating}
+                onChange={(value) => {
+                  send({
+                    type: "RATE",
+                    videoRated: {
+                      videoUrl: state.context.video.url,
+                      rating: value,
+                    },
+                  });
+                }}
+              />
+
+              <Flex gap="small">
+                <Button onClick={handleRandomVideo}>Random video</Button>
+                <Button
+                  type="dashed"
+                  onClick={() => send({ type: "MINIMIZE_TOGGLE" })}
+                >
+                  {isMinimized ? <ArrowsAltOutlined /> : <ShrinkOutlined />}
+                </Button>
+                <Button
+                  type="primary"
+                  onClick={() =>
+                    state.context.isPlaying
+                      ? send({ type: "PAUSE" })
+                      : send({ type: "PLAY" })
+                  }
+                >
+                  {state.context.isPlaying ? (
+                    <PauseOutlined />
+                  ) : (
+                    <CaretRightOutlined />
+                  )}
+                </Button>
+              </Flex>
+            </Flex>
           }
           open={isOpen}
           onCancel={() => send({ type: "CLOSE" })}
@@ -169,7 +192,7 @@ function App() {
               }}
             >
               <ReactPlayer
-                src={state.context.video.url}
+                src={currentVideoUrl}
                 playing={state.context.isPlaying}
                 controls={true}
                 width="100%"
