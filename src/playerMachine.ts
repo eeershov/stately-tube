@@ -6,6 +6,7 @@ type Context = {
     title: string;
     url: string;
   };
+  videoBounds: { left: number; top: number; bottom: number; right: number };
   isPlaying: boolean;
 };
 
@@ -14,6 +15,10 @@ type Events =
   | { type: "CLOSE" }
   | { type: "MINIMIZE_TOGGLE" }
   | { type: "CHANGE_VIDEO"; video: { title: string; url: string } }
+  | {
+      type: "DRAG_MINIMIZED";
+      videoBounds: { left: number; top: number; bottom: number; right: number };
+    }
   | { type: "TOGGLE_PLAYBACK" }
   | { type: "PLAY" }
   | { type: "PAUSE" };
@@ -33,6 +38,13 @@ export const playerMachine = setup({
     }),
     play: assign({ isPlaying: true }),
     pause: assign({ isPlaying: false }),
+    dragVideo: assign({
+      videoBounds: ({ event }) => {
+        assertEvent(event, "DRAG_MINIMIZED");
+        console.log("event", event);
+        return event.videoBounds;
+      },
+    }),
   },
 }).createMachine({
   id: "videoPlayer",
@@ -40,6 +52,7 @@ export const playerMachine = setup({
   context: {
     video: VIDEOS[0],
     isPlaying: true,
+    videoBounds: { bottom: 0, left: 0, right: 0, top: 0 },
   },
 
   on: {
@@ -68,6 +81,7 @@ export const playerMachine = setup({
 
     minimized: {
       on: {
+        DRAG_MINIMIZED: { actions: "dragVideo" },
         CLOSE: { target: "idle" },
         MINIMIZE_TOGGLE: { target: "modal" },
         PLAY: { actions: "play" },

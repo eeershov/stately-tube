@@ -3,6 +3,11 @@ import ReactPlayer from "react-player";
 import { playerMachine } from "./playerMachine";
 import { useMachine } from "@xstate/react";
 import { VIDEOS } from "./consts";
+import Draggable, {
+  type DraggableData,
+  type DraggableEvent,
+} from "react-draggable";
+import { useRef } from "react";
 
 const { Title } = Typography;
 
@@ -10,6 +15,24 @@ function App() {
   const [state, send] = useMachine(playerMachine);
   const isMinimized = state.matches("minimized");
   const isOpen = !state.matches("idle");
+  const draggleRef = useRef<HTMLDivElement>(null!);
+
+  const onStart = (_event: DraggableEvent, uiData: DraggableData) => {
+    const { clientWidth, clientHeight } = window.document.documentElement;
+    const targetRect = draggleRef.current?.getBoundingClientRect();
+    if (!targetRect) {
+      return;
+    }
+    send({
+      type: "DRAG_MINIMIZED",
+      videoBounds: {
+        left: -targetRect.left + uiData.x,
+        right: clientWidth - (targetRect.right - uiData.x),
+        top: -targetRect.top + uiData.y,
+        bottom: clientHeight - (targetRect.bottom - uiData.y),
+      },
+    });
+  };
 
   return (
     <Layout
@@ -31,6 +54,7 @@ function App() {
           type="primary"
           onClick={() => send({ type: "OPEN" })}
           style={{ width: 400, height: 300 }}
+          disabled={isOpen}
         >
           Play video
         </Button>
@@ -39,10 +63,15 @@ function App() {
           width={isMinimized ? 400 : 1000}
           destroyOnHidden
           centered
+          wrapClassName={isMinimized ? "floating-minimized-player" : undefined}
+          mask={!isMinimized}
+          maskClosable={!isMinimized}
           title={
-            <Title level={2} title="Video title">
-              {state.context.video.title}
-            </Title>
+            <div style={{ cursor: isMinimized ? "move" : "auto" }}>
+              <Title level={2} title="Video title">
+                {state.context.video.title}
+              </Title>
+            </div>
           }
           footer={
             <>
@@ -75,6 +104,16 @@ function App() {
           }
           open={isOpen}
           onCancel={() => send({ type: "CLOSE" })}
+          modalRender={(modal) => (
+            <Draggable
+              disabled={!isMinimized}
+              bounds={state.context.videoBounds}
+              nodeRef={draggleRef}
+              onStart={(event, uiData) => onStart(event, uiData)}
+            >
+              <div ref={draggleRef}>{modal}</div>
+            </Draggable>
+          )}
         >
           <ReactPlayer
             src={state.context.video.url}
