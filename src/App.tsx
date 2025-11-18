@@ -9,6 +9,7 @@ import {
   Card,
   Rate,
   Flex,
+  message,
 } from "antd";
 import ReactPlayer from "react-player";
 import { playerMachine } from "./playerMachine";
@@ -25,12 +26,23 @@ import {
   PauseOutlined,
   PlayCircleOutlined,
   ShrinkOutlined,
+  ShareAltOutlined,
 } from "@ant-design/icons";
 
 const { Title } = Typography;
 
 function App() {
-  const [state, send] = useMachine(playerMachine);
+  const urlParams = new URLSearchParams(window.location.search);
+  const videoIndexParam = urlParams.get("video");
+  const videoIndex = videoIndexParam ? parseInt(videoIndexParam, 10) : 0;
+  const initialVideo = VIDEOS[videoIndex] || VIDEOS[0];
+
+  const [state, send] = useMachine(playerMachine, {
+    input: {
+      initialVideo: initialVideo,
+    },
+  });
+
   const isMinimized = state.matches("minimized");
   const isOpen = !state.matches("idle");
   const draggleRef = useRef<HTMLDivElement>(null!);
@@ -49,6 +61,26 @@ function App() {
       type: "CHANGE_VIDEO",
       video: uniqueVideos[Math.floor(Math.random() * uniqueVideos.length)],
     });
+  };
+
+  const handleShare = () => {
+    const currentIndex = VIDEOS.findIndex(
+      (v) => v.id === state.context.video.id
+    );
+    if (currentIndex === -1) {
+      message.error({ content: "Unable to share: Video not found" });
+      return;
+    }
+
+    const shareUrl = `${window.location.origin}${window.location.pathname}?video=${currentIndex}`;
+    navigator.clipboard
+      .writeText(shareUrl)
+      .then(() => {
+        message.success({ content: "Share link copied to the clipboard" });
+      })
+      .catch(() => {
+        message.error({ content: "Failed to copy link. Please try manually" });
+      });
   };
 
   const onStart = (_event: DraggableEvent, uiData: DraggableData) => {
@@ -72,7 +104,7 @@ function App() {
     <Layout
       style={{
         height: "100vh",
-        overflow: "clip",
+        overflow: "hidden",
       }}
     >
       <Layout.Content
@@ -85,13 +117,17 @@ function App() {
       >
         <Card
           title="Welcome to the Stately-Tube"
-          style={{ width: "min-content" }}
+          style={{ maxWidth: 400, overflow: "hidden" }}
         >
+          <Title level={4} ellipsis>
+            {state.context.video.title}
+          </Title>
           <Button
+            title="Play the video"
             type="link"
             onClick={() => send({ type: "OPEN" })}
             style={{
-              width: 300,
+              width: "100%",
               height: 180,
               border: 2,
               borderColor: "blue",
@@ -116,31 +152,51 @@ function App() {
           wrapClassName={isMinimized ? "floating-minimized-player" : undefined}
           mask={!isMinimized}
           maskClosable={!isMinimized}
+          open={isOpen}
+          onCancel={() => send({ type: "CLOSE" })}
+          modalRender={(modal) => (
+            <Draggable
+              disabled={!isMinimized}
+              bounds={state.context.videoBounds}
+              position={isMinimized ? undefined : { x: 0, y: 0 }}
+              nodeRef={draggleRef}
+              onStart={(event, uiData) => onStart(event, uiData)}
+            >
+              <div ref={draggleRef}>{modal}</div>
+            </Draggable>
+          )}
           title={
             <div
               style={{
                 cursor: isMinimized ? "move" : "auto",
               }}
             >
-              <Title level={2} title="Video title">
+              <Title level={2} title="Video title" ellipsis={isMinimized}>
                 {state.context.video.title}
               </Title>
             </div>
           }
           footer={
-            <Flex justify="space-between">
-              <Rate
-                value={currentRating}
-                onChange={(value) => {
-                  send({
-                    type: "RATE",
-                    videoRated: {
-                      videoUrl: state.context.video.url,
-                      rating: value,
-                    },
-                  });
-                }}
-              />
+            <Flex justify={isMinimized ? "right" : "space-between"}>
+              {!isMinimized && (
+                <Flex gap="large" align="center">
+                  <Rate
+                    value={currentRating}
+                    onChange={(value) => {
+                      send({
+                        type: "RATE",
+                        videoRated: {
+                          videoUrl: state.context.video.url,
+                          rating: value,
+                        },
+                      });
+                    }}
+                  />
+                  <Button onClick={handleShare}>
+                    <ShareAltOutlined />
+                  </Button>
+                </Flex>
+              )}
 
               <Flex gap="small">
                 <Button onClick={handleRandomVideo}>Random video</Button>
@@ -167,19 +223,6 @@ function App() {
               </Flex>
             </Flex>
           }
-          open={isOpen}
-          onCancel={() => send({ type: "CLOSE" })}
-          modalRender={(modal) => (
-            <Draggable
-              disabled={!isMinimized}
-              bounds={state.context.videoBounds}
-              position={isMinimized ? undefined : { x: 0, y: 0 }}
-              nodeRef={draggleRef}
-              onStart={(event, uiData) => onStart(event, uiData)}
-            >
-              <div ref={draggleRef}>{modal}</div>
-            </Draggable>
-          )}
         >
           <Space direction="vertical" style={{ width: "100%" }}>
             {!isMinimized && <Divider style={{ borderColor: "#9b9b9bff" }} />}

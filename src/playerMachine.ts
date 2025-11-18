@@ -8,7 +8,11 @@ interface Context {
   isPlaying: boolean;
   videoBounds: { left: number; top: number; bottom: number; right: number };
   videoHistory: { videoUrl: string; rating: number }[];
-};
+}
+
+interface Input {
+  initialVideo?: VideoType;
+}
 
 type Events =
   | { type: "OPEN" }
@@ -28,6 +32,7 @@ export const playerMachine = setup({
   types: {} as {
     context: Context;
     events: Events;
+    input: Input;
   },
   actions: {
     changeVideo: assign({
@@ -64,12 +69,12 @@ export const playerMachine = setup({
 }).createMachine({
   id: "videoPlayer",
   initial: "idle",
-  context: {
-    video: VIDEOS[0],
+  context: ({ input }) => ({
+    video: input.initialVideo || VIDEOS[0],
     isPlaying: false,
     videoBounds: { bottom: 0, left: 0, right: 0, top: 0 },
     videoHistory: [],
-  },
+  }),
 
   on: {
     CHANGE_VIDEO: {
