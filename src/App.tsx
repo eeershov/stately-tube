@@ -2,6 +2,7 @@ import { Modal, Button, version, Typography, Layout } from "antd";
 import ReactPlayer from "react-player";
 import { playerMachine } from "./playerMachine";
 import { useMachine } from "@xstate/react";
+import { VIDEOS } from "./consts";
 
 const { Title } = Typography;
 
@@ -25,7 +26,7 @@ function App() {
           flexDirection: "column",
         }}
       >
-        <h1>antd version: {version}</h1>
+        <Title level={5}>antd version: {version}</Title>
         <Button
           type="primary"
           onClick={() => send({ type: "OPEN" })}
@@ -36,10 +37,11 @@ function App() {
         <Modal
           height={isMinimized ? 300 : 800}
           width={isMinimized ? 400 : 1000}
+          destroyOnHidden
           centered
           title={
             <Title level={2} title="Video title">
-              Video title
+              {state.context.video.title}
             </Title>
           }
           footer={
@@ -50,8 +52,24 @@ function App() {
               >
                 {isMinimized ? "Maximize" : "Minimize"}
               </Button>
-              <Button type="primary" onClick={() => send({ type: "CLOSE" })}>
-                Close
+              <Button
+                onClick={() =>
+                  send({
+                    type: "CHANGE_VIDEO",
+                    video: VIDEOS[Math.floor(Math.random() * VIDEOS.length)],
+                  })
+                }
+              >
+                Change to random video
+              </Button>
+              <Button
+                onClick={() =>
+                  state.context.isPlaying
+                    ? send({ type: "PAUSE" })
+                    : send({ type: "PLAY" })
+                }
+              >
+                {state.context.isPlaying ? "Pause" : "Play"}
               </Button>
             </>
           }
@@ -59,13 +77,15 @@ function App() {
           onCancel={() => send({ type: "CLOSE" })}
         >
           <ReactPlayer
-            muted={true}
-            playing
-            controls
+            src={state.context.video.url}
+            playing={state.context.isPlaying}
+            controls={true}
             width="auto"
             height="auto"
-            loop
-            src={state.context.videoUrl}
+            muted={false}
+            loop={true}
+            onPlay={() => send({ type: "PLAY" })}
+            onPause={() => send({ type: "PAUSE" })}
           />
         </Modal>
       </Layout.Content>
