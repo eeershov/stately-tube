@@ -3,5 +3,6 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+  "compilerOptions": { "strict": true, "skipLibCheck": true } // recommended XState v5 settings https://stately.ai/docs/migration#xstate-v5-and-typescript
 }
