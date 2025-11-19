@@ -26,3 +26,8 @@ export const VIDEOS = [
     url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
   },
 ];
+
+export const MODAL_SIZES = {
+  full: { width: 1000, height: 800 },
+  mini: { width: 500, height: 300 },
+};

@@ -14,12 +14,12 @@ import {
 import ReactPlayer from "react-player";
 import { playerMachine } from "./playerMachine";
 import { useMachine } from "@xstate/react";
-import { VIDEOS } from "./consts";
+import { VIDEOS, MODAL_SIZES } from "./consts";
 import Draggable, {
   type DraggableData,
   type DraggableEvent,
 } from "react-draggable";
-import { useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   ArrowsAltOutlined,
   CaretRightOutlined,
@@ -46,6 +46,13 @@ function App() {
   const isMinimized = state.matches("minimized");
   const isOpen = !state.matches("idle");
   const draggleRef = useRef<HTMLDivElement>(null!);
+
+  // Used to maintain the correct size during the Modal close animation
+  // Prevents Modal flipping to full size before it disappears from minimized state
+  const [isMinimizedSize, setIsMinimizedSize] = useState(false);
+  const modalSize = useMemo(() => {
+    return isMinimizedSize ? MODAL_SIZES.mini : MODAL_SIZES.full;
+  }, [isMinimizedSize]);
 
   const currentVideoTitle = state.context.video.title;
   const currentVideoUrl = state.context.video.url;
@@ -84,7 +91,7 @@ function App() {
       });
   };
 
-  const onStart = (_event: DraggableEvent, uiData: DraggableData) => {
+  const handleOnStart = (_event: DraggableEvent, uiData: DraggableData) => {
     const { clientWidth, clientHeight } = window.document.documentElement;
     const targetRect = draggleRef.current?.getBoundingClientRect();
     if (!targetRect) {
@@ -99,6 +106,15 @@ function App() {
         bottom: clientHeight - (targetRect.bottom - uiData.y),
       },
     });
+  };
+
+  const handleClosing = () => {
+    send({ type: "CLOSE" });
+  };
+
+  const handleMinimize = () => {
+    send({ type: "MINIMIZE_TOGGLE" });
+    setIsMinimizedSize((prev) => !prev);
   };
 
   return (
@@ -144,22 +160,23 @@ function App() {
           </Card>
         </Card>
         <Modal
-          height={isMinimized ? 300 : 800}
-          width={isMinimized ? 500 : 1000}
+          height={modalSize.height}
+          width={modalSize.width}
+          afterOpenChange={() => setIsMinimizedSize((prev) => prev && false)}
           destroyOnHidden
           centered
           wrapClassName={isMinimized ? "floating-minimized-player" : undefined}
           mask={!isMinimized}
           maskClosable={!isMinimized}
           open={isOpen}
-          onCancel={() => send({ type: "CLOSE" })}
+          onCancel={handleClosing}
           modalRender={(modal) => (
             <Draggable
               disabled={!isMinimized}
               bounds={state.context.videoBounds}
               position={isMinimized ? undefined : { x: 0, y: 0 }}
               nodeRef={draggleRef}
-              onStart={(event, uiData) => onStart(event, uiData)}
+              onStart={handleOnStart}
             >
               <div ref={draggleRef}>{modal}</div>
             </Draggable>
@@ -199,10 +216,7 @@ function App() {
 
               <Flex gap="small">
                 <Button onClick={handleRandomVideo}>Random video</Button>
-                <Button
-                  type="dashed"
-                  onClick={() => send({ type: "MINIMIZE_TOGGLE" })}
-                >
+                <Button type="dashed" onClick={handleMinimize}>
                   {isMinimized ? <ArrowsAltOutlined /> : <ShrinkOutlined />}
                 </Button>
                 <Button
