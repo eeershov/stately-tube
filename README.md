@@ -13,3 +13,11 @@ Available at https://eeershov.github.io/stately-tube/
    npm run dev
    ```
 3. go to http://localhost:5173/stately-tube/
+
+## Features
+
+- modal with video auto playback
+- rating (local state)
+- share (with url params)
+- random channel from pre-made list
+- minimized - draggable Modal with click through mask

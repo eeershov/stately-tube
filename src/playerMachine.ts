@@ -78,7 +78,7 @@ export const playerMachine = setup({
 
   on: {
     CHANGE_VIDEO: {
-      actions: "changeVideo",
+      actions: ["changeVideo", "play"],
     },
   },
 
