@@ -182,12 +182,14 @@ function App() {
               position={isMinimized ? undefined : { x: 0, y: 0 }}
               nodeRef={draggleRef}
               onStart={handleOnStart}
+              handle=".draggable-handle"
             >
               <div ref={draggleRef}>{modal}</div>
             </Draggable>
           )}
           title={
             <div
+              className="draggable-handle"
               style={{
                 cursor: isMinimized ? "move" : "auto",
               }}
