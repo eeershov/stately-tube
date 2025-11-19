@@ -47,6 +47,7 @@ function App() {
   const isOpen = !state.matches("idle");
   const draggleRef = useRef<HTMLDivElement>(null!);
 
+  const currentVideoTitle = state.context.video.title;
   const currentVideoUrl = state.context.video.url;
   const currentRatingEntry = state.context.videoHistory.find(
     (viewedVideo) => viewedVideo.videoUrl === currentVideoUrl
@@ -119,8 +120,8 @@ function App() {
           title="Welcome to the Stately-Tube"
           style={{ width: 400, overflow: "hidden" }}
         >
-          <Title level={4} ellipsis>
-            {state.context.video.title}
+          <Title level={4} title={currentVideoTitle} ellipsis>
+            {currentVideoTitle}
           </Title>
           <Button
             title="Play the video"
@@ -171,8 +172,8 @@ function App() {
                 cursor: isMinimized ? "move" : "auto",
               }}
             >
-              <Title level={2} title="Video title" ellipsis={isMinimized}>
-                {state.context.video.title}
+              <Title level={2} title={currentVideoTitle} ellipsis>
+                {currentVideoTitle}
               </Title>
             </div>
           }
