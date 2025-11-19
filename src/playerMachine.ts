@@ -1,7 +1,10 @@
 import { assertEvent, assign, setup } from "xstate";
 import { VIDEOS } from "./consts";
 import type { VideoType, VideoBounds, VideoRating } from "./types";
-
+import {
+  saveVideoHistoryToLocalStorage,
+  loadVideoHistoryFromLocalStorage,
+} from "./utils";
 
 interface Context {
   video: VideoType;
@@ -62,7 +65,9 @@ export const playerMachine = setup({
           (item) => item.videoUrl !== videoUrl
         );
 
-        return [...historyWithoutCurrent, { videoUrl, rating }];
+        const newHistory = [...historyWithoutCurrent, { videoUrl, rating }];
+        saveVideoHistoryToLocalStorage(newHistory);
+        return newHistory;
       },
     }),
   },
@@ -73,7 +78,7 @@ export const playerMachine = setup({
     video: input.initialVideo || VIDEOS[0],
     isPlaying: false,
     videoBounds: { bottom: 0, left: 0, right: 0, top: 0 },
-    videoHistory: [],
+    videoHistory: loadVideoHistoryFromLocalStorage(),
   }),
 
   on: {
