@@ -140,7 +140,7 @@ function App() {
           <Divider />
           <Card type="inner" title="Tech stack" style={{ width: "" }}>
             <Typography>
-              Vite, React, Typescript, react-player, antd {version}
+              Vite, React, Typescript, xstate v5, react-player, antd {version}
             </Typography>
           </Card>
         </Card>
