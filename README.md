@@ -17,7 +17,7 @@ Available at https://eeershov.github.io/stately-tube/
 ## Features
 
 - modal with video auto playback
-- rating (local state)
+- ratings (localStorage)
 - share (with url params)
 - random channel from pre-made list
 - minimized - draggable Modal with click through mask
