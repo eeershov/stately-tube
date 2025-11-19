@@ -125,14 +125,12 @@ function App() {
           </Title>
           <Button
             title="Play the video"
-            type="link"
+            variant="outlined"
+            color="primary"
             onClick={() => send({ type: "OPEN" })}
             style={{
               width: "100%",
               height: 180,
-              border: 2,
-              borderColor: "blue",
-              borderStyle: "solid",
             }}
             disabled={isOpen}
           >
