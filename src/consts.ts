@@ -1,4 +1,6 @@
-export const VIDEOS = [
+import type { VideoType } from "./types";
+
+export const VIDEOS: VideoType[] = [
   {
     id: 1,
     title: "The Big Buck Bunny",
@@ -31,3 +33,5 @@ export const MODAL_SIZES = {
   full: { width: 1000, height: 800 },
   mini: { width: 500, height: 300 },
 };
+
+export const LOCAL_STORAGE_KEY = "videoPlayerHistory";
