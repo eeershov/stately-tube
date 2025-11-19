@@ -117,7 +117,7 @@ function App() {
       >
         <Card
           title="Welcome to the Stately-Tube"
-          style={{ maxWidth: 400, overflow: "hidden" }}
+          style={{ width: 400, overflow: "hidden" }}
         >
           <Title level={4} ellipsis>
             {state.context.video.title}
