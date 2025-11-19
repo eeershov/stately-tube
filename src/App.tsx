@@ -10,6 +10,7 @@ import {
   Rate,
   Flex,
   message,
+  Grid,
 } from "antd";
 import ReactPlayer from "react-player";
 import { playerMachine } from "./playerMachine";
@@ -43,16 +44,20 @@ function App() {
     },
   });
 
-  const isMinimized = state.matches("minimized");
-  const isOpen = !state.matches("idle");
-  const draggleRef = useRef<HTMLDivElement>(null!);
-
   // Used to maintain the correct size during the Modal close animation
   // Prevents Modal flipping to full size before it disappears from minimized state
   const [isMinimizedSize, setIsMinimizedSize] = useState(false);
   const modalSize = useMemo(() => {
     return isMinimizedSize ? MODAL_SIZES.mini : MODAL_SIZES.full;
   }, [isMinimizedSize]);
+
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
+  const isMobile = screens.xs;
+
+  const isMinimized = state.matches("minimized");
+  const isOpen = !state.matches("idle");
+  const draggleRef = useRef<HTMLDivElement>(null!);
 
   const currentVideoTitle = state.context.video.title;
   const currentVideoUrl = state.context.video.url;
@@ -193,7 +198,13 @@ function App() {
             </div>
           }
           footer={
-            <Flex justify={isMinimized ? "right" : "space-between"}>
+            <Flex
+              justify={
+                isMinimized ? "right" : isMobile ? "center" : "space-between"
+              }
+              wrap
+              gap="small"
+            >
               {!isMinimized && (
                 <Flex gap="large" align="center">
                   <Rate
@@ -214,7 +225,7 @@ function App() {
                 </Flex>
               )}
 
-              <Flex gap="small">
+              <Flex gap="small" wrap>
                 <Button onClick={handleRandomVideo}>Random video</Button>
                 <Button type="dashed" onClick={handleMinimize}>
                   {isMinimized ? <ArrowsAltOutlined /> : <ShrinkOutlined />}
@@ -238,7 +249,7 @@ function App() {
           }
         >
           <Space direction="vertical" style={{ width: "100%" }}>
-            {!isMinimized && <Divider style={{ borderColor: "#9b9b9bff" }} />}
+            {!isMinimized && <Divider />}
             <div
               style={{
                 aspectRatio: "16 / 9",
@@ -259,7 +270,7 @@ function App() {
                 onPause={() => send({ type: "PAUSE" })}
               />
             </div>
-            {!isMinimized && <Divider style={{ borderColor: "#9b9b9bff" }} />}
+            {!isMinimized && <Divider />}
           </Space>
         </Modal>
       </Layout.Content>
